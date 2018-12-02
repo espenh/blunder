@@ -1,0 +1,36 @@
+{
+  "name": "blunder",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "chess.js": "^0.10.2",
+    "monaco-editor-webpack-plugin": "^1.7.0",
+    "chessbored": "0.0.1",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-monaco-editor": "^0.22.0",
+    "react-scripts": "2.1.1",
+    "typescript": "^3.2.1"
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "@craco/craco": "^3.1.1",
+    "@types/chess.js": "^0.10.0",
+    "@types/node": "10.12.11",
+    "raw-loader": "^0.5.1"
+  }
+}
