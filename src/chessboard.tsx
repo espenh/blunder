@@ -7,6 +7,19 @@ export class Board extends React.Component {
     private board!: ChessBoard;
     private game!: ChessInstance;
 
+    constructor(props: any) {
+        super(props);
+        window.addEventListener("resize", this.updateLayout);
+    }
+
+    public componentWillUnmount() {
+        window.removeEventListener("resize", this.updateLayout);
+    }
+
+    private updateLayout = () => {
+        this.board.resize();
+    }
+
     public componentDidMount() {
         if (!this.container) {
             return;
@@ -49,11 +62,7 @@ export class Board extends React.Component {
     }
 
     public render() {
-        return <div>
-            <button onClick={() => this.board.flip()}>Flip</button>
-            &nbsp;
-            <div className="board-container" ref={element => this.container = element} />
-        </div>;
+        return <div className="board-container" ref={element => this.container = element} />
     }
 
     private createChessInstance: () => ChessInstance = require("chess.js");

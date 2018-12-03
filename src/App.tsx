@@ -1,17 +1,41 @@
+import { AppBar, Tab, Tabs } from "@material-ui/core";
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { Test } from "./test";
 import { Board } from "./chessboard";
+import { Test } from "./test";
 
 class App extends Component {
-  render() {
+  public state = {
+    value: 0
+  };
+
+  public handleChange = (event: any, value: number) => {
+    this.setState({ value });
+  };
+
+  public render() {
+    const { value } = this.state;
     return (
-      <div className="App">
-        <Test/>
-        <Board/>
+      <div className="app-container">
+        <div className="code-and-board">
+          <AppBar position="static">
+            <Tabs className="tab-bar" value={value} onChange={this.handleChange}>
+              <Tab label="Code" />
+              <Tab label="Board" />
+            </Tabs>
+          </AppBar>
+          {value === 0 && <TabContainer><Test /></TabContainer>}
+          {value === 1 && <TabContainer><Board /></TabContainer>}
+        </div>
+        <div className="stats-container">Stats here?</div>
       </div>
     );
+  }
+}
+
+class TabContainer extends React.Component {
+  public render() {
+    return <div className="tab-container">{this.props.children}</div>;
   }
 }
 
