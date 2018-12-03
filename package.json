@@ -4,9 +4,11 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.6.1",
+    "@types/lodash": "^4.14.118",
     "chess.js": "^0.10.2",
-    "monaco-editor-webpack-plugin": "^1.7.0",
     "chessbored": "0.0.1",
+    "lodash": "^4.17.11",
+    "monaco-editor-webpack-plugin": "^1.7.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
     "react-monaco-editor": "^0.22.0",

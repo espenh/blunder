@@ -1,8 +1,7 @@
-import { AppBar, Tab, Tabs } from "@material-ui/core";
 import React, { Component } from 'react';
 import './App.css';
 import { Board } from "./chessboard";
-import { Test } from "./test";
+import { Editor } from "./test";
 
 class App extends Component {
   public state = {
@@ -18,14 +17,8 @@ class App extends Component {
     return (
       <div className="app-container">
         <div className="code-and-board">
-          <AppBar position="static">
-            <Tabs className="tab-bar" value={value} onChange={this.handleChange}>
-              <Tab label="Code" />
-              <Tab label="Board" />
-            </Tabs>
-          </AppBar>
-          {value === 0 && <TabContainer><Test /></TabContainer>}
-          {value === 1 && <TabContainer><Board /></TabContainer>}
+          <Editor />
+          <Board />
         </div>
         <div className="stats-container">Stats here?</div>
       </div>

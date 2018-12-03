@@ -1,12 +1,12 @@
 import React from "react";
 import MonacoEditor from "react-monaco-editor";
-//import { transpileModule, ScriptTarget, JsxEmit } from "typescript";
-import QuickStart from '!raw-loader!./test.tsx';
+import SamplePlayerCode from '!raw-loader!./models/samplePlayer.ts';
+import ChessTypesCode from '!raw-loader!./models/chessContracts.d.ts';
 import { editor } from "monaco-editor";
 import * as editorApi from "monaco-editor/esm/vs/editor/editor.api";
 import { transpileModule } from "typescript";
 
-export class Test extends React.Component {
+export class Editor extends React.Component {
 
     private editor!: editor.IStandaloneCodeEditor;
 
@@ -26,16 +26,15 @@ export class Test extends React.Component {
 
     public componentDidMount() {
         console.log("MOUNT!");
-        console.log(QuickStart);
+        console.log(SamplePlayerCode);
     }
 
     private editorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: typeof editorApi) => {
         console.log('editorDidMount', editor);
         this.editor = editor;
         editor.focus();
-        /*monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-            jsx: 1
-        });*/
+
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(ChessTypesCode);
     }
     private onChange = (newValue: any, e: any) => {
         const output = transpileModule(newValue, {
@@ -48,18 +47,23 @@ export class Test extends React.Component {
     }
 
     public render() {
-        const code = QuickStart;
+        const code = SamplePlayerCode;
 
         const options: editor.IEditorConstructionOptions = {
-            selectOnLineNumbers: true
+            selectOnLineNumbers: true,
+            minimap: {
+                enabled: false
+            }
         };
-        return <MonacoEditor
-            language="typescript"
-            theme="vs-dark"
-            value={code}
-            options={options}
-            onChange={this.onChange}
-            editorDidMount={this.editorDidMount}
-        />;
+        return <div className="editor-container">
+            <MonacoEditor
+                language="typescript"
+                theme="vs-dark"
+                value={code}
+                options={options}
+                onChange={this.onChange}
+                editorDidMount={this.editorDidMount}
+            />
+        </div>;
     }
 }
