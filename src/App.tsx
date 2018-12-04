@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import './App.css';
-import { Board } from "./chessboard";
-import { Editor } from "./test";
+import './app.css';
+import { Button } from "@material-ui/core";
+import { MainView } from './components/mainView';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { CompetitionView } from './components/competitionView';
 
 class App extends Component {
   public state = {
@@ -13,22 +15,21 @@ class App extends Component {
   };
 
   public render() {
-    const { value } = this.state;
-    return (
-      <div className="app-container">
-        <div className="code-and-board">
-          <Editor />
-          <Board />
+    return <>
+      <BrowserRouter>
+        <div className="app-container">
+          <div className="app-sidebar">
+            <Button>X</Button>
+          </div>
+          <div className="app-main">
+            <Switch>
+              <Route path="/competition" component={CompetitionView} />
+              <Route path="/" component={MainView} />
+            </Switch>
+          </div>
         </div>
-        <div className="stats-container">Stats here?</div>
-      </div>
-    );
-  }
-}
-
-class TabContainer extends React.Component {
-  public render() {
-    return <div className="tab-container">{this.props.children}</div>;
+      </BrowserRouter>
+    </>;
   }
 }
 

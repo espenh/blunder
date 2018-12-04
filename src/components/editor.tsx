@@ -1,7 +1,7 @@
 import React from "react";
 import MonacoEditor from "react-monaco-editor";
-import SamplePlayerCode from '!raw-loader!./models/samplePlayer.ts';
-import ChessTypesCode from '!raw-loader!./models/chessContracts.d.ts';
+import SamplePlayerCode from '!raw-loader!./../models/samplePlayer.ts';
+import ChessTypesCode from '!raw-loader!./../models/chessContracts.d.ts';
 import { editor } from "monaco-editor";
 import * as editorApi from "monaco-editor/esm/vs/editor/editor.api";
 import { transpileModule } from "typescript";
@@ -9,6 +9,12 @@ import { transpileModule } from "typescript";
 export class Editor extends React.Component {
 
     private editor!: editor.IStandaloneCodeEditor;
+
+    public state: {
+        code: string
+    } = {
+            code: SamplePlayerCode
+        };
 
     constructor(props: any) {
         super(props);
@@ -24,30 +30,26 @@ export class Editor extends React.Component {
         this.editor.render();
     }
 
-    public componentDidMount() {
-        console.log("MOUNT!");
-        console.log(SamplePlayerCode);
-    }
-
     private editorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: typeof editorApi) => {
-        console.log('editorDidMount', editor);
         this.editor = editor;
         editor.focus();
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(ChessTypesCode);
     }
-    private onChange = (newValue: any, e: any) => {
+    private onChange = (newValue: string, e: any) => {
+        this.setState({
+            code: newValue
+        });
+
         const output = transpileModule(newValue, {
             compilerOptions: {
                 target: 2
             }
         });
-        console.log('onChange', newValue, e);
-        console.log("output", output);
     }
 
     public render() {
-        const code = SamplePlayerCode;
+        const code = this.state.code;
 
         const options: editor.IEditorConstructionOptions = {
             selectOnLineNumbers: true,

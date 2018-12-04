@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './app';
 import * as serviceWorker from './serviceWorker';
 import { createMuiTheme, Theme, MuiThemeProvider, CssBaseline, withStyles } from '@material-ui/core';
 import { blue, pink } from '@material-ui/core/colors';
+import { BrowserRouter } from 'react-router-dom';
 
 const theme = createMuiTheme({
     palette: {
