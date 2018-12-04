@@ -33,5 +33,7 @@ declare interface IChessPlayer {
     /**
      * Return a move in a short-notation format, like "e4" or "exd4".
      */
-    move(board: IBoardContext): string; // This will probably become a promise.
+    move(board: IBoardContext): string | Promise<string>;
 }
+
+declare const WebAssembly: any;

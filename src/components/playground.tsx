@@ -3,12 +3,15 @@ import { Board } from "./chessboard";
 import { Editor } from "./editor";
 import { Button } from "@material-ui/core";
 import { compileTypeScript } from "../utils/tsCompiler";
+import { sleep } from "../utils/promiseUtils";
 
 export class Playground extends React.Component {
 
     // Hacky, but we need a quick way of poking into these..
     private board!: Board;
     private editor!: Editor;
+    private compiledPlayer: IChessPlayer | undefined;
+    private compiledPlayerInitialized: boolean | undefined;
 
     private captureBoard = (board: Board) => {
         this.board = board;
@@ -23,7 +26,7 @@ export class Playground extends React.Component {
         this.board.syncWithGame();
     }
 
-    private compileAndMove = () => {
+    private compilePlayerCode = async () => {
         let latestCode = this.editor.state.code;
 
         if (latestCode) {
@@ -33,16 +36,32 @@ export class Playground extends React.Component {
 
                 const jsCode = compileTypeScript(latestCode);
                 const playerCreator = new Function(jsCode);
-                const player = playerCreator() as IChessPlayer;
 
-                this.makeAMove(player);
+                this.compiledPlayer = playerCreator() as IChessPlayer;
+                this.compiledPlayerInitialized = false;
             } catch (err) {
+                // TODO - Handle.
                 console.error(err);
             }
         }
     }
 
-    private makeAMove(player: IChessPlayer) {
+    private makeAMove = async () => {
+        if (!this.compiledPlayer) {
+            return;
+        }
+
+        if (!this.compiledPlayerInitialized && this.compiledPlayer.initialize) {
+            const initializeResult = await Promise.resolve(this.compiledPlayer.initialize());
+            if (!initializeResult) {
+                return;
+            }
+
+            // Wait a bit to make sure that the player is initialized.
+            await sleep(2000);
+            this.compiledPlayerInitialized = true;
+        }
+
         const game = this.board.getGame();
         if (game.game_over()) {
             return;
@@ -54,8 +73,8 @@ export class Playground extends React.Component {
             turn: game.turn()
         };
 
-        const move = player.move(context);
-        game.move(move);
+        const move = await Promise.resolve(this.compiledPlayer.move(context));
+        game.move(move, { sloppy: true });
         this.board.syncWithGame();
     }
 
@@ -66,7 +85,8 @@ export class Playground extends React.Component {
                 <Board ref={this.captureBoard} />
             </div>
             <div className="stats-container">
-                <Button onClick={this.compileAndMove}>Move</Button>
+                <Button onClick={this.compilePlayerCode}>Compile</Button>
+                <Button onClick={this.makeAMove}>Move</Button>
                 <Button onClick={this.resetBoard}>Reset</Button>
             </div>
         </>;
