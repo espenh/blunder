@@ -20,6 +20,18 @@ export class Board extends React.Component {
         this.board.resize();
     }
 
+    public getGame() {
+        return this.game;
+    }
+
+    public syncWithGame() {
+        this.board.position(this.game.fen());
+    }
+
+    public makeMove(move: string) {
+        this.board.move([move]);
+    }
+
     public componentDidMount() {
         if (!this.container) {
             return;

@@ -24,5 +24,14 @@ declare interface IBoardContext {
 }
 
 declare interface IChessPlayer {
+    /**
+     * Called when a player is initialized.
+     * Returning false or Promise<false> here means that the player isn't ready.
+     */
+    initialize?(): boolean | Promise<boolean>;
+
+    /**
+     * Return a move in a short-notation format, like "e4" or "exd4".
+     */
     move(board: IBoardContext): string; // This will probably become a promise.
 }

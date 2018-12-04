@@ -8,3 +8,8 @@ declare module "!raw-loader!*" {
 declare module "monaco-editor/esm/vs/language/typescript/lib/typescriptServices" {
     export { transpileModule } from "typescript";
 }
+
+declare module "stockfish.js" {
+    const content: any;
+    export default content;
+}

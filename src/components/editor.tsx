@@ -1,12 +1,14 @@
 import React from "react";
 import MonacoEditor from "react-monaco-editor";
-import SamplePlayerCode from '!raw-loader!./../models/samplePlayer.ts';
+import SamplePlayerCode from '!raw-loader!./../models/samplePlayer.d.ts';
 import ChessTypesCode from '!raw-loader!./../models/chessContracts.d.ts';
 import { editor } from "monaco-editor";
 import * as editorApi from "monaco-editor/esm/vs/editor/editor.api";
-import { transpileModule } from "typescript";
 
-export class Editor extends React.Component {
+export interface IEditorProps {
+}
+
+export class Editor extends React.Component<IEditorProps> {
 
     private editor!: editor.IStandaloneCodeEditor;
 
@@ -36,15 +38,9 @@ export class Editor extends React.Component {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(ChessTypesCode);
     }
-    private onChange = (newValue: string, e: any) => {
+    private onChange = (newCode: string, e: any) => {
         this.setState({
-            code: newValue
-        });
-
-        const output = transpileModule(newValue, {
-            compilerOptions: {
-                target: 2
-            }
+            code: newCode
         });
     }
 
