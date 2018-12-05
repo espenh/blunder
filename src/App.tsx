@@ -13,7 +13,7 @@ class App extends Component {
       <BrowserRouter>
         <div className="app-container">
           <div className="app-sidebar">
-            
+            <SideBar />
           </div>
           <div className="app-main">
             <Switch>
