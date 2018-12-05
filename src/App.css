@@ -12,6 +12,20 @@
   grid-row: 1 / 3;
   background-color: #000;
   border-right: 4px solid #666;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.app-sidebar .sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-sidebar .sidebar-header {
+  color: #fefefe;
+  transform: rotate(90deg);
+  font-size: 2em;
 }
 
 .app-main {
