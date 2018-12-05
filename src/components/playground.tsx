@@ -5,6 +5,8 @@ import { Button } from "@material-ui/core";
 import { compileTypeScript } from "../utils/tsCompiler";
 import { sleep } from "../utils/promiseUtils";
 
+import StockFishCode from '!raw-loader!./../models/sampleStockfishPlayer.d.ts';
+
 export class Playground extends React.Component {
 
     // Hacky, but we need a quick way of poking into these..
@@ -24,6 +26,12 @@ export class Playground extends React.Component {
     private resetBoard = () => {
         this.board.getGame().reset();
         this.board.syncWithGame();
+    }
+
+    private stockfish = () => {
+        this.editor.setState({
+            code: StockFishCode
+        });
     }
 
     private compilePlayerCode = async () => {
@@ -86,8 +94,9 @@ export class Playground extends React.Component {
             </div>
             <div className="stats-container">
                 <Button onClick={this.compilePlayerCode}>Compile</Button>
-                <Button onClick={this.makeAMove}>Move</Button>
-                <Button onClick={this.resetBoard}>Reset</Button>
+                <Button color="primary" onClick={this.makeAMove}>Move</Button>
+                <Button color="secondary" onClick={this.resetBoard}>Reset</Button>
+                <Button onClick={this.stockfish}>Stockfish</Button>
             </div>
         </>;
     }
