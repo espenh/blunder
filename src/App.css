@@ -95,3 +95,9 @@
     justify-content: center;
     align-items: center;
 }
+
+.placeholder {
+    font-size: 5em;
+    opacity: 0.5;
+    padding: 10px;
+}
