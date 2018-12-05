@@ -6,6 +6,7 @@ import { compileTypeScript } from "../utils/tsCompiler";
 import { sleep } from "../utils/promiseUtils";
 
 import StockFishCode from '!raw-loader!./../models/sampleStockfishPlayer.d.ts';
+import RandomPlayerCode from '!raw-loader!./../models/randomPlayer.d.ts';
 
 export class Playground extends React.Component {
 
@@ -28,9 +29,15 @@ export class Playground extends React.Component {
         this.board.syncWithGame();
     }
 
-    private stockfish = () => {
+    private loadStockfishPlayer = () => {
         this.editor.setState({
             code: StockFishCode
+        });
+    }
+
+    private loadRandomPlayer = () => {
+        this.editor.setState({
+            code: RandomPlayerCode
         });
     }
 
@@ -96,7 +103,9 @@ export class Playground extends React.Component {
                 <Button onClick={this.compilePlayerCode}>Compile</Button>
                 <Button color="primary" onClick={this.makeAMove}>Move</Button>
                 <Button color="secondary" onClick={this.resetBoard}>Reset</Button>
-                <Button onClick={this.stockfish}>Stockfish</Button>
+                &nbsp;&nbsp;
+                <Button onClick={this.loadRandomPlayer}>Random</Button>
+                <Button onClick={this.loadStockfishPlayer}>Stockfish</Button>
             </div>
         </>;
     }
