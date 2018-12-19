@@ -12,9 +12,9 @@ export class SideBar extends React.Component {
 
         return <>
             <div className="sidebar-buttons">
-                <Button component={playgroundLink}><FontAwesomeIcon icon={faChessBoard} /></Button>;
-                <Button component={vsBotLink}><FontAwesomeIcon icon={faRobot} /></Button>
-                <Button component={battleLink}><FontAwesomeIcon icon={faTrophy} /></Button>
+                <Button component={playgroundLink}><FontAwesomeIcon icon={faChessBoard} size="2x" /></Button>
+                <Button component={vsBotLink}><FontAwesomeIcon icon={faRobot} size="2x" /></Button>
+                <Button component={battleLink}><FontAwesomeIcon icon={faTrophy} size="2x" /></Button>
             </div>
             <div className="sidebar-header">
                 <span>Blunder</span>

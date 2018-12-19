@@ -2,7 +2,11 @@ import * as React from "react";
 import { ChessBoard } from "chessbored";
 import { ChessInstance } from "chess.js";
 
-export class Board extends React.Component {
+export interface IChessBoardProps {
+    handleMoveEnd?(): void;
+}
+
+export class Board extends React.Component<IChessBoardProps> {
     private container: HTMLElement | null | undefined;
     private board!: ChessBoard;
     private game!: ChessInstance;
@@ -59,6 +63,11 @@ export class Board extends React.Component {
 
                 // illegal move
                 if (move === null) return 'snapback';
+            },
+            onMoveEnd: () => {
+                if (this.props.handleMoveEnd) {
+                    this.props.handleMoveEnd();
+                }
             },
             onSnapEnd: () => {
                 this.board.position(this.game.fen());

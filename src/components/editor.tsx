@@ -6,6 +6,7 @@ import { editor } from "monaco-editor";
 import * as editorApi from "monaco-editor/esm/vs/editor/editor.api";
 
 export interface IEditorProps {
+    handleCodeChange?(code: string):void;
 }
 
 export class Editor extends React.Component<IEditorProps> {
@@ -42,6 +43,10 @@ export class Editor extends React.Component<IEditorProps> {
         this.setState({
             code: newCode
         });
+
+        if(this.props.handleCodeChange) {
+            this.props.handleCodeChange(newCode);
+        }
     }
 
     public render() {
