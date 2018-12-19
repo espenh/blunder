@@ -1,5 +1,7 @@
 let stockfish: Worker;
 let messages: string[] = [];
+
+// Give Stockfish two seconds to move.
 const moveTime = 2000;
 
 const player: IChessPlayer = {
@@ -22,7 +24,7 @@ const player: IChessPlayer = {
 const getMove = (fen: string, timeout: number) => {
     // Take some time away from the move time to compensate
     // for misc. overhead (load wasm, create worker, etc.).
-    const engineMoveTime = Math.max(timeout - 1000, 1000);
+    const engineMoveTime = Math.max(timeout - 500, 1000);
     const uciMessagesToSend: string[] = [
         `position fen ${fen}`,
         "setoption name MultiPV value 3",

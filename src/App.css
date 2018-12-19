@@ -68,6 +68,7 @@
 .stats-container .charts {
   grid-row: 2;
   display: flex;
+  min-width: 0;
 }
 
 .score-chart {

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChessBoard } from "chessbored";
 import { ChessInstance } from "chess.js";
+import { sleep } from "../utils/promiseUtils";
 
 export interface IChessBoardProps {
     handleMoveEnd?(): void;
@@ -28,8 +29,11 @@ export class Board extends React.Component<IChessBoardProps> {
         return this.game;
     }
 
-    public syncWithGame() {
+    public async syncWithGame() {
         this.board.position(this.game.fen());
+        
+        // Allow for animations to complete.
+        await sleep(150);
     }
 
     public makeMove(move: string) {
@@ -65,12 +69,18 @@ export class Board extends React.Component<IChessBoardProps> {
                 if (move === null) return 'snapback';
             },
             onMoveEnd: () => {
+                // This is called when when moves are made using the api.
                 if (this.props.handleMoveEnd) {
                     this.props.handleMoveEnd();
                 }
             },
             onSnapEnd: () => {
                 this.board.position(this.game.fen());
+                
+                // This is called when the user makes a move.
+                if (this.props.handleMoveEnd) {
+                    this.props.handleMoveEnd();
+                }
             },
             onDragStart: (_source, piece) => {
                 if (this.game.game_over()) {

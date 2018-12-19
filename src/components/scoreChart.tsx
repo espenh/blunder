@@ -1,8 +1,11 @@
 import React from "react";
 import * as highcharts from "highcharts";
+import { blue } from "@material-ui/core/colors";
+import _ from "lodash";
 
 export interface IMoveScore {
-    move: number;
+    sequence: number;
+    move: string,
     score: {
         b: number,
         w: number
@@ -43,14 +46,34 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
                 {
                     id: "scoreSeries",
                     name: "Score",
-                    type: "line"
+                    type: "line",
+                    color: blue[500]
                 }
             ],
+            xAxis: {
+                allowDecimals: false,
+                lineWidth: 0
+            },
             yAxis: {
                 title: {
-                    text: "Score"
+                    text: undefined
                 },
-                gridLineColor: 'rgba(255,255,255,0.1)'
+                gridLineColor: 'rgba(255,255,255,0.1)',
+                softMin: -1,
+                softMax: 1
+            },
+            plotOptions: {
+                series: {
+                    tooltip: {
+                        headerFormat: undefined,
+                        pointFormatter: function () {
+                            //const self = this as highcharts.Point;
+                            //const score = self.y;
+                            //return 'After : ' + self.x + ': ' + _.round(score, 1) + '</b>';
+                            return "wip";
+                        }
+                    }
+                }
             }
         });
 
@@ -74,9 +97,9 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
         }
 
         const scoreSeries = this.chart.get("scoreSeries") as highcharts.Series;
-        const seriesData = this.props.scores.map(score => {
+        const seriesData = this.props.scores.map((score) => {
             return {
-                x: score.move,
+                x: score.sequence,
                 y: score.score.w - score.score.b
             };
         });

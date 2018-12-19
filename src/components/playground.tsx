@@ -1,14 +1,17 @@
+import _ from "lodash";
 import React from "react";
+import { Button, CircularProgress } from "@material-ui/core";
+
 import { Board } from "./chessboard";
 import { Editor } from "./editor";
-import { Button } from "@material-ui/core";
 import { compileTypeScript } from "../utils/tsCompiler";
 import { sleep } from "../utils/promiseUtils";
 
 import StockFishCode from '!raw-loader!./../models/sampleStockfishPlayer.d.ts';
 import RandomPlayerCode from '!raw-loader!./../models/randomPlayer.d.ts';
 import { ScoreChart, IMoveScore } from "./scoreChart";
-import _ from "lodash";
+import { getPositionalScores } from "../models/boardScorer";
+
 
 export class Playground extends React.Component {
 
@@ -23,8 +26,10 @@ export class Playground extends React.Component {
     } | undefined;
 
     public state: {
+        isComputing: boolean,
         scores: IMoveScore[]
     } = {
+            isComputing: false,
             // Store a score for each move.
             scores: []
         }
@@ -45,18 +50,26 @@ export class Playground extends React.Component {
     private handleMoveCompleted = () => {
         const game = this.board.getGame();
         const currentScore = this.state.scores;
-        
-        const newScore: IMoveScore = {
-            move: game.history().length + 1,
-            score: {
-                w: _.random(0,5),
-                b: _.random(0,5)
-            }
-        };
 
-        this.setState({
-            scores: [...currentScore, newScore]
-        });
+        const moves = game.history();
+
+        if (!moves.length) {
+            this.setState({
+                scores: []
+            });
+        } else {
+            const positionalScore = getPositionalScores(game);
+
+            const newScore: IMoveScore = {
+                sequence: moves.length,
+                move: moves[moves.length - 1],
+                score: positionalScore
+            };
+
+            this.setState({
+                scores: [...currentScore, newScore]
+            });
+        }
     }
 
     private resetBoard = () => {
@@ -103,10 +116,17 @@ export class Playground extends React.Component {
     }
 
     private makeAMove = async () => {
+        // Capture the active element.
+        const activeElement = document.activeElement as HTMLButtonElement | null;
+
         const game = this.board.getGame();
         if (game.game_over()) {
             return;
         }
+
+        this.setState({
+            isComputing: true
+        });
 
         // Compile and initialize the player.
         if (!this.compiled) {
@@ -139,7 +159,17 @@ export class Playground extends React.Component {
         const moveFromPlayer = await Promise.resolve(this.compiled.player.move(context));
         game.move(moveFromPlayer, { sloppy: true });
 
-        this.board.syncWithGame();
+        await this.board.syncWithGame();
+
+        this.setState({
+            isComputing: false
+        }, () => {
+            // Hack: It might have taken some time to make the move, and the move-button is disabled when "thinking".
+            // To let the user just keep pressing enter on the button, we set the focus back when the button is enabled.
+            if (activeElement && activeElement.focus) {
+                activeElement.focus();
+            }
+        });
     }
 
     public render() {
@@ -150,10 +180,14 @@ export class Playground extends React.Component {
             </div>
             <div className="stats-container">
                 <div className="toolbar">
-                    <Button color="primary" onClick={this.makeAMove}>Move</Button>
-                    <Button color="secondary" onClick={this.resetBoard}>Reset</Button>
+                    <div style={{ position: "relative" }}>
+                        <Button color="primary" onClick={this.makeAMove} disabled={this.state.isComputing}>Move</Button>
+                        {this.state.isComputing && <CircularProgress size={24} style={{ position: 'absolute', top: '50%', left: '50%', marginTop: -12, marginLeft: -12 }} />}
+                    </div>
+                    <Button color="secondary" onClick={this.resetBoard} disabled={this.state.isComputing}>Reset</Button>
                     <Button onClick={this.loadRandomPlayer}>Random</Button>
                     <Button onClick={this.loadStockfishPlayer}>Stockfish</Button>
+
                 </div>
                 <div className="charts">
                     <ScoreChart scores={this.state.scores} />
