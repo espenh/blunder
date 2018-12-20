@@ -63,8 +63,6 @@ export function getPositionalScores(board: ChessInstance): { [color in PieceColo
     - Control of squares (especially center)
     */
 
-
-
     // Add a bonus for number of possible moves.
     const whiteMoves = getMoves(board, "w");
     const blackMoves = getMoves(board, "b");
