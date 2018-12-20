@@ -54,7 +54,7 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
                 {
                     id: "scoreSeries",
                     name: "Score",
-                    type: "line",
+                    type: "area",
                     color: blue[500]
                 }
             ],
@@ -68,16 +68,29 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
                 },
                 gridLineColor: 'rgba(255,255,255,0.1)',
                 softMin: -1,
-                softMax: 1
+                softMax: 1,
+                plotLines: [{
+                    value: 0,
+                    color: 'rgba(255,255,255,0.3)',
+                    width: 1,
+                    zIndex: 4
+                }]
             },
             plotOptions: {
+                area: {
+                    fillOpacity: 0.1
+                },
                 series: {
+                    lineWidth: 1.5,
+                    marker: {
+                        enabled: true
+                    },
                     tooltip: {
                         headerFormat: undefined,
                         pointFormatter: function () {
                             // This is messy, but we're essentially just picking stuff from the data
                             // point and creating a decent tooltip.
-                            const self = this as IMoveDataPoint;
+                            const self = (this as any) as IMoveDataPoint;
                             const score = self.y === undefined ? 0 : _.round(self.y, 1);
 
                             const diff = _.round(score - self.previousScore, 1);
