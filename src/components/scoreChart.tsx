@@ -5,11 +5,19 @@ import _ from "lodash";
 
 export interface IMoveScore {
     sequence: number;
-    move: string,
+    moveMadeBy: PieceColor;
+    move: string;
     score: {
         b: number,
         w: number
     };
+}
+
+export interface IMoveDataPoint extends highcharts.Point {
+    sequence: number;
+    moveMadeBy: PieceColor;
+    move: string;
+    previousScore: number;
 }
 
 export interface IScoreChartProps {
@@ -67,10 +75,14 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
                     tooltip: {
                         headerFormat: undefined,
                         pointFormatter: function () {
-                            //const self = this as highcharts.Point;
-                            //const score = self.y;
-                            //return 'After : ' + self.x + ': ' + _.round(score, 1) + '</b>';
-                            return "wip";
+                            // This is messy, but we're essentially just picking stuff from the data
+                            // point and creating a decent tooltip.
+                            const self = this as IMoveDataPoint;
+                            const score = self.y === undefined ? 0 : _.round(self.y, 1);
+
+                            const diff = _.round(score - self.previousScore, 1);
+                            const diffText = diff > 0 ? "+" + diff : diff;
+                            return `${self.moveMadeBy === "w" ? "White" : "Black"} played ${self.move} <b>${score}</b> (${diffText})`;
                         }
                     }
                 }
@@ -97,10 +109,16 @@ export class ScoreChart extends React.Component<IScoreChartProps> {
         }
 
         const scoreSeries = this.chart.get("scoreSeries") as highcharts.Series;
-        const seriesData = this.props.scores.map((score) => {
+        const seriesData = this.props.scores.map((score, scoreIndex) => {
+            // TODO: This previousScore calculation in this iteration seems out of place.
+            const previousScore = scoreIndex > 0 ? this.props.scores[scoreIndex - 1].score : { b: 0, w: 0 };
+
             return {
                 x: score.sequence,
-                y: score.score.w - score.score.b
+                y: score.score.w - score.score.b,
+                moveMadeBy: score.moveMadeBy,
+                move: score.move,
+                previousScore: previousScore.w - previousScore.b
             };
         });
 

@@ -11,7 +11,13 @@ import StockFishCode from '!raw-loader!./../models/sampleStockfishPlayer.d.ts';
 import RandomPlayerCode from '!raw-loader!./../models/randomPlayer.d.ts';
 import { ScoreChart, IMoveScore } from "./scoreChart";
 import { getPositionalScores } from "../models/boardScorer";
+import { oppositeColor } from "../models/boardUtils";
+import { hashCode } from "../models/hashUtils";
 
+interface ICompiledPlayer {
+    player: IChessPlayer;
+    isInitialized: boolean;
+}
 
 export class Playground extends React.Component {
 
@@ -20,10 +26,7 @@ export class Playground extends React.Component {
     private editor!: Editor;
 
     // Store the compiled player. Deleted on code change.
-    private compiled: {
-        player: IChessPlayer,
-        isInitialized: boolean
-    } | undefined;
+    private cachedPlayersByHash: { [hash: string]: ICompiledPlayer } = {};
 
     public state: {
         isComputing: boolean,
@@ -42,11 +45,6 @@ export class Playground extends React.Component {
         this.editor = editor;
     }
 
-    private handleCodeChange = () => {
-        this.compiled = undefined;
-        // TODO - How to clean up? Might need optional .dispose() on player.
-    }
-
     private handleMoveCompleted = () => {
         const game = this.board.getGame();
         const currentScore = this.state.scores;
@@ -62,6 +60,7 @@ export class Playground extends React.Component {
 
             const newScore: IMoveScore = {
                 sequence: moves.length,
+                moveMadeBy: oppositeColor(game.turn()),
                 move: moves[moves.length - 1],
                 score: positionalScore
             };
@@ -85,34 +84,59 @@ export class Playground extends React.Component {
         this.editor.setState({
             code: StockFishCode
         });
-        this.handleCodeChange();
     }
 
     private loadRandomPlayer = () => {
         this.editor.setState({
             code: RandomPlayerCode
         });
-        this.handleCodeChange();
     }
 
-    private compilePlayerCode = async (codeToCompile: string) => {
-        if (codeToCompile) {
-            try {
-                // HACK - Tack on the return here.
-                codeToCompile += "; return player;";
+    private compilePlayerCode = async (codeToCompile: string): Promise<ICompiledPlayer | undefined> => {
+        try {
+            // HACK - Tack on the return here.
+            codeToCompile += "; return player;";
 
-                const jsCode = compileTypeScript(codeToCompile);
-                const playerCreator = new Function(jsCode);
+            const jsCode = compileTypeScript(codeToCompile);
+            const playerCreator = new Function(jsCode);
 
-                this.compiled = {
-                    player: playerCreator() as IChessPlayer,
-                    isInitialized: false
-                };
-            } catch (err) {
-                // TODO - Handle.
-                console.error(err);
-            }
+            return {
+                player: playerCreator() as IChessPlayer,
+                isInitialized: false
+            };
+        } catch (err) {
+            // TODO - Handle.
+            console.error(err);
+            return undefined;
         }
+    }
+
+    private getCompiledPlayer = async (latestCode: string) => {
+        const playerHash = hashCode(latestCode);
+        if (!this.cachedPlayersByHash[playerHash]) {
+            // Compile and initialize the player.
+            const player = await this.compilePlayerCode(latestCode);
+            if (!player) {
+                return;
+            }
+
+            // Run the initialization function if defined.
+            if (!player.isInitialized && player.player.initialize) {
+                const initializeResult = await Promise.resolve(player.player.initialize());
+                if (!initializeResult) {
+                    // TODO - Handle this. Player might be dependent on service that's currently not available.
+                    return;
+                }
+
+                // Wait a bit to make sure that the player is initialized.
+                await sleep(2000);
+                player.isInitialized = true;
+            }
+
+            this.cachedPlayersByHash[playerHash] = player;
+        }
+
+        return this.cachedPlayersByHash[playerHash];
     }
 
     private makeAMove = async () => {
@@ -128,38 +152,26 @@ export class Playground extends React.Component {
             isComputing: true
         });
 
-        // Compile and initialize the player.
-        if (!this.compiled) {
+        try {
             const latestCode = this.editor.state.code;
-            await this.compilePlayerCode(latestCode);
-            if (!this.compiled) {
-                return;
+            const player = await this.getCompiledPlayer(latestCode);
+
+            if (player) {
+                // Set up a context and use the compiled player to make a move.
+                const context: IBoardContext = {
+                    fen: () => game.fen(),
+                    possibleMoves: game.moves(),
+                    turn: game.turn()
+                };
+
+                const moveFromPlayer = await Promise.resolve(player.player.move(context));
+                game.move(moveFromPlayer, { sloppy: true });
+
+                await this.board.syncWithGame();
             }
+        } catch (err) {
+            // TOOD Handle errors.
         }
-
-        if (!this.compiled.isInitialized && this.compiled.player.initialize) {
-            const initializeResult = await Promise.resolve(this.compiled.player.initialize());
-            if (!initializeResult) {
-                // TODO - Handle this. Player might be dependent on service that's not available.
-                return;
-            }
-
-            // Wait a bit to make sure that the player is initialized.
-            await sleep(2000);
-            this.compiled.isInitialized = true;
-        }
-
-        // Set up a context and use the compiled player to make a move.
-        const context: IBoardContext = {
-            fen: () => game.fen(),
-            possibleMoves: game.moves(),
-            turn: game.turn()
-        };
-
-        const moveFromPlayer = await Promise.resolve(this.compiled.player.move(context));
-        game.move(moveFromPlayer, { sloppy: true });
-
-        await this.board.syncWithGame();
 
         this.setState({
             isComputing: false
@@ -175,7 +187,7 @@ export class Playground extends React.Component {
     public render() {
         return <>
             <div className="code-and-board">
-                <Editor ref={this.captureEditor} handleCodeChange={this.handleCodeChange} />
+                <Editor ref={this.captureEditor} />
                 <Board ref={this.captureBoard} handleMoveEnd={this.handleMoveCompleted} />
             </div>
             <div className="stats-container">
